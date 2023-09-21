@@ -12,6 +12,8 @@ LOG_FILE="${DIR_LOG}/deepthought"
 
 ## ARCH
 
+ARCH_KEYMAP="us"
+
 # INCLUDE
 
 source "${DIR_INC}/log"
