@@ -1,0 +1,17 @@
+# CONFIG
+
+## DIR
+
+DIR_BASE="${PWD?}"
+DIR_INC="$(cd ${BASH_SOURCE[0]%/*} && echo ${PWD})"
+DIR_LOG="${DIR_BASE}"
+
+## LOG
+
+LOG_FILE="${DIR_LOG}/deepthought"
+
+# INCLUDE
+
+source "${DIR_INC}/log"
+source "${DIR_INC}/arch/setup"
+source "${DIR_INC}/i3/setup"

@@ -1,0 +1,9 @@
+#!/bin/bash -eu
+
+source ./utils/include
+
+MODE="${1:-"arch-i3"}"
+
+case "${MODE}" in
+	"arch-i3") ;;
+esac
