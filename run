@@ -5,5 +5,8 @@ source ./utils/include
 MODE="${1:-"arch-i3"}"
 
 case "${MODE}" in
-	"arch-i3") ;;
+	"arch-i3")
+		arch::install
+		i3::install
+	;;
 esac

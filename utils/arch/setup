@@ -1,0 +1,28 @@
+
+function	arch::install()
+{
+	arch::load_keymap
+	arch::get_internet
+}
+
+function	arch::load_keymap()
+{
+	:
+}
+
+function	arch::get_internet()
+{
+	local	ip_a_s="$(ip --color=never a s)"
+
+	HAVE_INTERNET=0
+	if [ $(grep <<<${ip_a_s} -E "wlan0") ]; then
+		arch::try_wifi
+	fi
+}
+
+function	arch::try_wifi()
+{
+	[ "${ARCH_AP_SSID}" == "" ] && return ;
+
+}
+
