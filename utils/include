@@ -13,6 +13,11 @@ LOG_FILE="${DIR_LOG}/deepthought"
 ## ARCH
 
 ARCH_KEYMAP="us"
+ARCH_PART=(
+	"/boot EFI 500M"
+	"swap SWAP 8G"
+	"/ LINUX"
+)
 
 # INCLUDE
 
