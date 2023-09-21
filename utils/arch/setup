@@ -6,9 +6,17 @@ function	arch::install()
 }
 
 function	arch::verify_internet()
-{ ping -W1 -c1 archlinux.org; }
+{
+	local	have_internet
+
+	have_internet="$(ping -W1 -c1 archlinux.org 1>/dev/null 2>/dev/null ; echo $?)"
+	if [ "${have_internet}" -ne 0 ]; then
+		log "no internet, aborting"
+		return 1
+	fi
+}
 
 function	arch::load_keymap()
 {
-	load_keymap "${ARCH_KEYMAP}"
+	loadkeys "${ARCH_KEYMAP}"
 }

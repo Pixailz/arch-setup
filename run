@@ -10,3 +10,5 @@ case "${MODE}" in
 		i3::install
 	;;
 esac
+
+exit $?
