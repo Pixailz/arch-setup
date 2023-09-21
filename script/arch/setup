@@ -1,0 +1,78 @@
+
+arch::install()
+{
+	arch::verify_internet
+	arch::load_keymap
+	arch::prepare_disk
+}
+
+arch::verify_internet()
+{
+	local	have_internet
+
+	have_internet="$(ping -W1 -c1 archlinux.org 1>/dev/null 2>/dev/null ; echo $?)"
+	if [ "${have_internet}" -ne 0 ]; then
+		log::erro "No internet, aborting"
+		return 1
+	fi
+}
+
+arch::load_keymap()
+{
+	loadkeys "${ARCH_KEYMAP}"
+}
+
+arch::choose_disk()
+{
+	local disks
+	local i=0
+	local tmp
+	declare -a disks=($(lsblk -dnpro name,size | grep -v "loop" | tr " " ","))
+
+	log::info "choose a disk:"
+	for disk in ${disks[@]}; do
+		IFS="," read -ra disk <<< "${disk}"
+		printf "$((++i)) - ${disk[0]} (${disk[1]})\n"
+	done
+	read choice
+	case ${choice} in
+		''|*[!0-9]*)
+			log::erro "(${choice}) not numeric choice"
+			return 1;
+		;;
+	esac
+	if [ ${choice} -lt 1 ] || [ ${choice} -gt ${i} ]; then
+		log::erro "(${choice}) wrong choice"
+		return 1;
+	fi
+	((choice--))
+	IFS="," read -ra tmp <<< ${disks[${choice}]}
+	CHOOSEN_DISK="${tmp[0]}"
+}
+
+arch::erase_disk()
+{
+	dd if=/dev/zero of="${CHOOSEN_DISK}" status=progress count=1
+}
+
+arch::partitioning()
+{
+	for item in ${ARCH_PARTITION[*]}; do
+		IFS=',' read -ra ADDR <<< "$item"
+		printf "${ADDR[*]}\n"
+	done
+}
+
+arch::prepare_disk()
+{
+	local	do
+
+	utils::ask "Do partionning ?" "y" && do="y" || do="n"
+	if [ "${do}" != "y" ]; then
+		log::info "Aborting partionning"
+		return ;
+	fi
+	arch::choose_disk
+	arch::erase_disk
+	arch::partitioning
+}

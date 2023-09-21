@@ -1,0 +1,51 @@
+: ${LOG_FILE?}
+
+[ ! -d "${DIR_LOG}" ] && mkdir -p "${DIR_LOG}"
+[ ! -f "${LOG_FILE}" ] && : > "${LOG_FILE}"
+
+function log::write()
+{
+	local msg="${1?}"
+	local mode="${2}"
+
+	case "${mode}" in
+		"0") printf "%b" "${msg}" 2>&1 | tee -a "${LOG_FILE}" ;;
+		"1") printf "%b" "${msg}" ;;
+		"2") printf "%b" "${msg}" 2>&1 >> "${LOG_FILE}" ;;
+	esac
+}
+
+
+log::info()
+{ log::write "${P_INFO} ${1}\n" "${2:-0}"; }
+
+log::warn()
+{ log::write "${P_WARN} ${1}\n" "${2:-0}"; }
+
+log::ques()
+{ log::write "${P_QUES} ${1}" "${2:-0}"; }
+
+log::pass()
+{ log::write "${P_PASS} ${1}\n" "${2:-0}"; }
+
+log::fail()
+{ log::write "${P_FAIL} ${1}\n" "${2:-0}"; }
+
+log::erro()
+{ log::write "${P_ERRO} ${1}\n" "${2:-0}"; }
+
+function log()
+{ log::write "${1}" "${2:-0}"; }
+
+function log::title()
+{ log::write "==============================\n${1}\n==============================\n" "${2:-0}"; }
+
+function log::new_launch()
+{
+	local date
+
+	printf -v date "%(%H:%m:%y %x)T"
+	log::title "NEW LAUNCH ${date}\n" "2"
+}
+
+log::new_launch

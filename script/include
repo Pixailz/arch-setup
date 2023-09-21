@@ -13,14 +13,16 @@ LOG_FILE="${DIR_LOG}/deepthought"
 ## ARCH
 
 ARCH_KEYMAP="us"
-ARCH_PART=(
-	"/boot EFI 500M"
-	"swap SWAP 8G"
-	"/ LINUX"
+ARCH_PARTITION=(
+	"/boot,EFI,500M"
+	"swap,SWAP,8G"
+	"/,LINUX"
 )
 
 # INCLUDE
 
+source "${DIR_INC}/ansi"
 source "${DIR_INC}/log"
+source "${DIR_INC}/utils"
 source "${DIR_INC}/arch/setup"
 source "${DIR_INC}/i3/setup"

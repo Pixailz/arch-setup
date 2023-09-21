@@ -1,10 +1,10 @@
 #!/bin/bash -eu
 
-source ./utils/include
+source ./script/include
 
 [ "${UID?}" -ne 0 ] && { log "run as root." ; exit 1; }
 
-MODE="${1:-"arch-i3"}"
+MODE="${1:-arch-i3}"
 
 case "${MODE}" in
 	"arch-i3")

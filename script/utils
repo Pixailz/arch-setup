@@ -1,0 +1,36 @@
+
+utils::ask()
+{
+	local message=$1
+	local default=${2:-NULL}
+	local choice=""
+
+	while true; do
+		# set default prompt according to $default
+		if [ ${default} == "y" ]; then
+			log::ques "${message} (Y/n) " 1
+		elif [ ${default} == "n" ]; then
+			log::ques "${message} (y/N) " 1
+		else
+			log::ques "${message} (y/n) " 1
+		fi
+		# read on char
+		read -n 1 choice
+		# make char lower
+		choice="${choice,,}"
+		# if choice is not empty, print return line
+		[ ${choice} ] && printf "\x0a"
+		case ${choice} in
+			y) return 0 ;;
+			n) return 1 ;;
+			*)  if [ "${default}" == 'y' ]; then
+					return 0
+				elif [ "${default}" == 'n' ]; then
+					return 1
+				else
+					log::warn "[${choice}] wrong choice (y|n)"
+				fi
+				;;
+		esac
+	done
+}
