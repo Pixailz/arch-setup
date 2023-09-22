@@ -33,7 +33,8 @@ ARCH_PKG=(
 	"xorg" "xorg-xinit"
 	"dhcpcd" "iwd" "networkmanager"
  # OTHER
-	"git" "vim" "docker"
+	"git" "vim"
+	"docker" "docker-compose"
 	"htop"
 	"openbsd-netcat"
 	"unzip"
