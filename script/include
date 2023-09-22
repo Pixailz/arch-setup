@@ -30,7 +30,7 @@ ARCH_PKG=(
 	"grub" "efibootmgr"
 	"dbus"
 	"sudo" "base-devel"
-	"xorg" "xorg-init"
+	"xorg" "xorg-xinit"
 	"dhcpcd" "iwd" "networkmanager"
  # OTHER
 	"git" "vim" "docker"
@@ -52,6 +52,8 @@ ARCH_SERVICE=(
 	"docker.service"
 	"iwd.service"
 )
+ARCH_USER_NAME="pix"
+ARCH_USER_PASS="pass"
 
 ### FDISK
 declare -gA FDISK_TYPE

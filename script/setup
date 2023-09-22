@@ -54,10 +54,14 @@ arch::install()
 
 	log::info "Enabling services"
 	arch::enable_service
-	log::pass "Enabled services ${ARCH_SERVICE}"
+	log::pass "Enabled services ${ARCH_SERVICE[@]}"
+
+	log::info "Creating new user"
+	arch::create_user
+	log::info "Created new user"
 
 	log::info "Installing yay"
-	arch::do_chroot "git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && makepkg -si"
+	arch::install_yay
 	log::pass "Installed yay"
 
 	local	do
@@ -172,7 +176,7 @@ arch::formating()
 		((i++)) || true
 		IFS=',' read -ra detail <<< "${partition}"
 		case "${detail[1]}" in
-			"EFI") mkfs.fat -F 32 -I "${CHOOSEN_DISK}${i}";;
+			"EFI") mkfs.fat -I -F 32 "${CHOOSEN_DISK}${i}";;
 			"SWAP") mkswap "${CHOOSEN_DISK}${i}";;
 			"LINUX") mkfs.ext4 "${CHOOSEN_DISK}${i}";;
 		esac
@@ -238,7 +242,7 @@ arch::uncomment_line()
 	local	line_file="${2?}"
 	local	to_replace="$(grep -oE "${line}.*$" /mnt/root/${line_file} || echo failed)"
 	[ "${to_replace}" == "failed" ] && {
-		log::failed "cannot find ${line} into /mnt/root/${line_file}"
+		log::fail "cannot find ${line} into /mnt/root/${line_file}"
 		return
 	}
 	local	regex="s/^.*${to_replace}.*$/${to_replace}/g"
@@ -255,6 +259,20 @@ arch::install_grub()
 arch::enable_service()
 {
 	for service in ${ARCH_SERVICE[@]}; do
-		ls -s /mnt/root{/usr/lib/systemd/system,/etc/systemd/system/multi-user.target.wants}/${service}
+		ln -s /mnt/root{/usr/lib/systemd/system,/etc/systemd/system/multi-user.target.wants}/${service}
 	done
+}
+
+arch::create_user()
+{
+	arch::do_chroot "useradd -m -d /home/${ARCH_USER_NAME} -s /bin/bash ${ARCH_USER_NAME}"
+	arch::do_chroot "echo \"${ARCH_USER_NAME}:${ARCH_USER_PASS}\" | chpasswd"
+	arch::do_chroot "usermod -aG wheel ${ARCH_USER_NAME}"
+	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
+}
+
+arch::install_yay()
+{
+	printf "git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && HOME=/home/${ARCH_USER_NAME} makepkg -si --noconfirm" | arch-chroot -u ${ARCH_USER_NAME} /mnt/root
+	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
 }
