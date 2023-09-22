@@ -14,9 +14,37 @@ LOG_FILE="${DIR_LOG}/deepthought"
 
 ARCH_KEYMAP="us"
 ARCH_PARTITION=(
-	"/boot,EFI,500M"
-	"swap,SWAP,8G"
-	"/,LINUX"
+	"500M,EFI"
+	"8G,SWAP"
+	"+,LINUX"
+)
+ARCH_MOUNT=(
+	"3,/"
+	"1,/boot"
+	"2,swap"
+)
+ARCH_REFLECTOR_COUNTRY="France"
+ARCH_PKG=(
+	# BASE
+	"base" "linux" "linux-firmware" "grub" "efibootmgr"
+	# OTHER
+	"git" "vim" "iwd" "networkmanager"
+)
+
+ARCH_LOCAL_TZ="Europe/Paris"
+ARCH_LOCAL_TOGEN=(
+	"en_US.UTF-8"
+)
+ARCH_LANG="en_US.UTF-8"
+ARCH_HOSTNAME="arch"
+ARCH_ROOT_PASS="pass"
+
+### FDISK
+declare -gA FDISK_TYPE
+FDISK_TYPE=(
+	["EFI"]="ef"
+	["SWAP"]="82"
+	["LINUX"]="83"
 )
 
 # INCLUDE
