@@ -26,9 +26,9 @@ ARCH_MOUNT=(
 ARCH_REFLECTOR_COUNTRY="France"
 ARCH_PKG=(
 	# BASE
-	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo"
-	# OTHER
-	"git" "vim" "iwd" "dhcpcd" "networkmanager" "htop"
+	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo" "base-devel" "dbus"
+ # OTHER
+	"git" "vim" "iwd" "dhcpcd" "networkmanager" "htop" "openbsd-netcat" "unzip"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"
