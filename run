@@ -1,0 +1,23 @@
+#!/bin/bash -eu
+##BEGIN#__________________________>#_|INFO|_#<________________________________##
+##                                                           ______ _         ##
+## DETAILS:                                                  | ___ (_)        ##
+##- FILENAME		run                                      | |_/ /___  __   ##
+##- SCRIPT_ID		0x0005                                   |  __/| \ \/ /   ##
+##- AUTHOR			Pixailz                                  | |   | |>  <    ##
+##- CREATED			2023−09−21T16:11:51+0100                 \_|   |_/_/\_\   ##
+##END#____________________________<#_|INFO|_#>________________________________##
+
+source ./script/include
+
+[ "${UID?}" -ne 0 ] && { log "run as root." ; exit 1; }
+
+MODE="${1:-arch}"
+
+case "${MODE}" in
+	"arch")
+		arch::install
+	;;
+esac
+
+exit $?

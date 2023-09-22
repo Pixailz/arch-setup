@@ -1,0 +1,55 @@
+# CONFIG
+
+## DIR
+
+DIR_BASE="${PWD?}"
+DIR_INC="$(cd ${BASH_SOURCE[0]%/*} && echo ${PWD})"
+DIR_LOG="${DIR_BASE}"
+
+## LOG
+
+LOG_FILE="${DIR_LOG}/deepthought"
+
+## ARCH
+
+ARCH_KEYMAP="us"
+ARCH_PARTITION=(
+	"500M,EFI"
+	"8G,SWAP"
+	"+,LINUX"
+)
+ARCH_MOUNT=(
+	"3,/"
+	"1,/boot"
+	"2,swap"
+)
+ARCH_REFLECTOR_COUNTRY="France"
+ARCH_PKG=(
+	# BASE
+	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo"
+	# OTHER
+	"git" "vim" "iwd" "networkmanager" "htop"
+)
+
+ARCH_LOCAL_TZ="Europe/Paris"
+ARCH_LOCAL_TOGEN=(
+	"en_US.UTF-8"
+)
+ARCH_LANG="en_US.UTF-8"
+ARCH_HOSTNAME="arch"
+ARCH_ROOT_PASS="pass"
+
+### FDISK
+declare -gA FDISK_TYPE
+FDISK_TYPE=(
+	["EFI"]="ef"
+	["SWAP"]="82"
+	["LINUX"]="83"
+)
+
+# INCLUDE
+
+source "${DIR_INC}/ansi"
+source "${DIR_INC}/log"
+source "${DIR_INC}/utils"
+source "${DIR_INC}/setup"

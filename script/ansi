@@ -1,0 +1,20 @@
+RST="\x1b[0m"			# RESET
+G="\x1b[38;5;40m"		# GREEN
+R="\x1b[38;5;196m"		# RED
+B="\x1b[34m"			# BLUE
+Y="\x1b[33m"			# YELLOW
+C="\x1b[36m"			# CYAN
+M="\x1b[35m"			# MAGENTA
+O="\x1b[38;5;214m"		# ORANGE
+LG="\x1b[92m"			# LIGHT GREEN
+LY="\x1b[93m"			# LIGHT_YELLOW
+LB="\x1b[94m"			# LIGHT_BLUE
+LM="\x1b[95m"			# LIGHT_MAGENTA
+LC="\x1b[96m"			# LIGHT_CYAN
+
+P_INFO="[${LC}INFO${RST}]"
+P_WARN="[${O}WARN${RST}]"
+P_QUES="[${B}QUES${RST}]"
+P_PASS="[${G}PASS${RST}]"
+P_FAIL="[${R}FAIL${RST}]"
+P_ERRO="[${R}ERRO${RST}]"
