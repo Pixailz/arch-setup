@@ -26,9 +26,9 @@ ARCH_MOUNT=(
 ARCH_REFLECTOR_COUNTRY="France"
 ARCH_PKG=(
 	# BASE
-	"base" "linux" "linux-firmware" "grub" "efibootmgr"
+	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo"
 	# OTHER
-	"git" "vim" "iwd" "networkmanager"
+	"git" "vim" "iwd" "networkmanager" "htop"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"
@@ -52,5 +52,4 @@ FDISK_TYPE=(
 source "${DIR_INC}/ansi"
 source "${DIR_INC}/log"
 source "${DIR_INC}/utils"
-source "${DIR_INC}/arch/setup"
-source "${DIR_INC}/i3/setup"
+source "${DIR_INC}/setup"

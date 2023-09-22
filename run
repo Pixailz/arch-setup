@@ -12,12 +12,11 @@ source ./script/include
 
 [ "${UID?}" -ne 0 ] && { log "run as root." ; exit 1; }
 
-MODE="${1:-arch-i3}"
+MODE="${1:-arch}"
 
 case "${MODE}" in
-	"arch-i3")
+	"arch")
 		arch::install
-		i3::install
 	;;
 esac
 
