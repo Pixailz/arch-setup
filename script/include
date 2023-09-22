@@ -28,7 +28,7 @@ ARCH_PKG=(
 	# BASE
 	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo"
 	# OTHER
-	"git" "vim" "iwd" "networkmanager" "htop"
+	"git" "vim" "iwd" "dhcpcd" "networkmanager" "htop"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"
