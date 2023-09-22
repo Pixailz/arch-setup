@@ -1,15 +1,14 @@
-# arch-i3-setup
+# arch-setup
 
-Script to install / setup arch with i3
+Script to install / setup arch
 
 ## HOWTO
 
 [Arch Install guide](https://wiki.archlinux.org/title/Installation_guide)
 
-you should have at least internet connection in your booted live install of arch
+you only have to do [this](https://wiki.archlinux.org/title/Installation_guide#Connect_to_the_internet) part of the tutorial to be able to transfer the repo into the target host 
 
-because git isn't installed by default on live install, you can transfer the
-repo with nc instead:
+because git isn't installed by default on live install, you can do it with nc instead:
 
 ```bash
 # on your actual PC
