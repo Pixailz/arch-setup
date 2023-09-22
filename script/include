@@ -25,10 +25,19 @@ ARCH_MOUNT=(
 )
 ARCH_REFLECTOR_COUNTRY="France"
 ARCH_PKG=(
-	# BASE
-	"base" "linux" "linux-firmware" "grub" "efibootmgr" "sudo" "base-devel" "dbus"
+# BASE
+	"base" "linux" "linux-firmware"
+	"grub" "efibootmgr"
+	"dbus"
+	"sudo" "base-devel"
+	"xorg" "xorg-init"
+	"dhcpcd" "iwd" "networkmanager"
  # OTHER
-	"git" "vim" "iwd" "dhcpcd" "networkmanager" "htop" "openbsd-netcat" "unzip"
+	"git" "vim" "docker"
+	"htop"
+	"openbsd-netcat"
+	"unzip"
+	"openssh"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"
@@ -38,6 +47,11 @@ ARCH_LOCAL_TOGEN=(
 ARCH_LANG="en_US.UTF-8"
 ARCH_HOSTNAME="arch"
 ARCH_ROOT_PASS="pass"
+ARCH_SERVICE=(
+	"dhcpcd.service"
+	"docker.service"
+	"iwd.service"
+)
 
 ### FDISK
 declare -gA FDISK_TYPE

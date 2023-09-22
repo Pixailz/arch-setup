@@ -52,6 +52,14 @@ arch::install()
 
 	arch::install_grub
 
+	log::info "Enabling services"
+	arch::enable_service
+	log::pass "Enabled services ${ARCH_SERVICE}"
+
+	log::info "Installing yay"
+	arch::do_chroot "git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && makepkg -si"
+	log::pass "Installed yay"
+
 	local	do
 
 	utils::ask "Do reboot ?" "y" && do="y" || do="n"
@@ -242,4 +250,11 @@ arch::install_grub()
 {
 	arch::do_chroot "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB"
 	arch::do_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+}
+
+arch::enable_service()
+{
+	for service in ${ARCH_SERVICE[@]}; do
+		ls -s /mnt/root{/usr/lib/systemd/system,/etc/systemd/system/multi-user.target.wants}/${service}
+	done
 }
