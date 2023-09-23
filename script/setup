@@ -64,10 +64,10 @@ arch::install()
 	arch::install_yay
 	log::pass "Installed yay"
 
-	local	do
+	local	do_reboot
 
-	utils::ask "Do reboot ?" "y" && do="y" || do="n"
-	if [ "${do}" != "y" ]; then
+	utils::ask "Do reboot ?" "y" && do_reboot="y" || do_reboot="n"
+	if [ "${do_reboot}" == "y" ]; then
 		umount /mnt/root/boot
 		umount /mnt/root/
 		reboot
@@ -87,10 +87,10 @@ arch::verify_internet()
 
 arch::clean_disk()
 {
-	local	do
+	local	do_clean
 
-	utils::ask "Do cleaning ?" "y" && do="y" || do="n"
-	if [ "${do}" != "y" ]; then
+	utils::ask "Do cleaning ?" "y" && do_clean="y" || do_clean="n"
+	if [ "${do_clean}" != "y" ]; then
 		log::info "Aborting cleaning"
 		return ;
 	fi
