@@ -38,12 +38,13 @@ ARCH_PKG=(
  # AUDIO
 	"alsa-utils" "pulseaudio" "pulseaudio-alsa"
 # OTHER
-	"git" "vim" "tmux" "gdb" "valgrind"
+	"git" "tmux" "gdb" "valgrind" "htop"
 	"docker" "docker-compose"
-	"htop"
 	"openbsd-netcat"
 	"unzip"
 	"openssh"
+ # EDITOR
+	"vim"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"
