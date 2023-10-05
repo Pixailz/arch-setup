@@ -10,14 +10,304 @@
 
 source ./script/include
 
-[ "${UID?}" -ne 0 ] && { log "run as root." ; exit 1; }
+arch::install()
+{
+	[ "${UID?}" -ne 0 ] && { log "run as root." ; exit 1; }
 
-MODE="${1:-arch}"
+	log::info "Verifying internet"
+	arch::verify_internet
+	log::pass "Verified internet"
 
-case "${MODE}" in
-	"arch")
-		arch::install
-	;;
-esac
+	log::info "Loading keymap"
+	loadkeys "${ARCH_KEYMAP}"
+	log::pass "Loaded keymap: ${ARCH_KEYMAP}"
+
+	log::pass "Choosing disk"
+	arch::choose_disk
+	log::pass "Choosen disk: ${CHOOSEN_DISK}"
+
+	log::info "Cleaning disk"
+	arch::clean_disk
+
+	log::info "[${CHOOSEN_DISK}] Mounting partition"
+	arch::mount_disk
+	log::pass "[${CHOOSEN_DISK}] Mounted partition"
+
+	log::info "Refinding mirrors"
+	reflector	--country "${ARCH_REFLECTOR_COUNTRY?}" \
+				--age 12 \
+				--protocol https \
+				--sort rate \
+				--save /etc/pacman.d/mirrorlist
+	log::pass "Refinded mirrors \n$(cat /etc/pacman.d/mirrorlist)"
+
+	arch::configure_pacman
+
+	log::info "Installing base package"
+	pacstrap -K /mnt/root ${ARCH_PKG[@]}
+	log::pass "Installed base package: ${ARCH_PKG[@]}"
+
+	log::info "Generating fstab)"
+	genfstab -U /mnt/root > /mnt/root/etc/fstab
+	log::pass "Generated fstab\n$(cat /mnt/root/etc/fstab)"
+
+	arch::generate_local
+
+	log::info "Syncing clock"
+	arch::do_chroot "hwclock --systohc"
+	log::pass "Synced clock"
+
+	log::info "Changing root password"
+	arch::do_chroot "echo \"root:${ARCH_ROOT_PASS}\" | chpasswd"
+	log::pass "Changed root password (${ARCH_ROOT_PASS})"
+
+	log::info "Changing hostname"
+	echo ${ARCH_HOSTNAME} > /mnt/root/etc/hostname
+	log::pass "Changed hostname (${ARCH_HOSTNAME})"
+
+	arch::install_grub
+
+	log::info "Enabling services"
+	arch::enable_service
+	log::pass "Enabled services ${ARCH_SERVICE[@]}"
+
+	log::info "Creating new user"
+	arch::create_user
+	log::info "Created new user"
+
+	log::info "Installing yay"
+	arch::install_yay
+	log::pass "Installed yay"
+
+	log::info "Configuring pacman"
+	arch::configure_pacman "/mnt/root/etc/pacman.conf"
+	log::pass "Configured pacman"
+
+	local	do_reboot
+
+	utils::ask "Do reboot ?" "y" && do_reboot="y" || do_reboot="n"
+	if [ "${do_reboot}" == "y" ]; then
+		umount /mnt/root/boot
+		umount /mnt/root/
+		reboot
+	fi
+}
+
+arch::verify_internet()
+{
+	local	have_internet
+
+	have_internet="$(ping -W1 -c1 archlinux.org 1>/dev/null 2>/dev/null ; echo $?)"
+	if [ "${have_internet}" -ne 0 ]; then
+		log::erro "No internet, aborting"
+		return 1
+	fi
+}
+
+arch::clean_disk()
+{
+	local	do_clean
+
+	utils::ask "Do cleaning ?" "y" && do_clean="y" || do_clean="n"
+	if [ "${do_clean}" != "y" ]; then
+		log::info "Aborting cleaning"
+		return ;
+	fi
+
+	log::info "[${CHOOSEN_DISK}] Erasing disk"
+	arch::erase_disk
+	log::pass "[${CHOOSEN_DISK}] Erased disk"
+
+	log::info "[${CHOOSEN_DISK}] Partitioning disk"
+	arch::partitioning
+	log::pass "[${CHOOSEN_DISK}] Partitioned disk"
+
+	log::info "[${CHOOSEN_DISK}] Formating disk"
+	arch::formating
+	log::pass "[${CHOOSEN_DISK}] Formated disk"
+	log::pass "Cleaned disk"
+}
+
+arch::choose_disk()
+{
+	local disks
+	local i=0
+	local tmp
+	declare -a disks=($(lsblk -dnpro name,size | grep -v "loop" | tr " " ","))
+
+	log::info "choose a disk:" 1
+	for disk in ${disks[@]}; do
+		IFS="," read -ra disk <<< "${disk}"
+		printf "$((++i)) - ${disk[0]} (${disk[1]})\n"
+	done
+	read choice
+	case ${choice} in
+		''|*[!0-9]*)
+			log::erro "(${choice}) not numeric choice"
+			return 1;
+		;;
+	esac
+	if [ ${choice} -lt 1 ] || [ ${choice} -gt ${i} ]; then
+		log::erro "(${choice}) wrong choice"
+		return 1;
+	fi
+	((choice--))
+	IFS="," read -ra tmp <<< "${disks[${choice}]}"
+	CHOOSEN_DISK="${tmp[0]}"
+}
+
+arch::erase_disk()
+{
+	wipefs -fa "${CHOOSEN_DISK}"
+	dd if=/dev/zero of="${CHOOSEN_DISK}" bs=512 count=1
+}
+
+arch::partitioning()
+{
+	local size
+	local type
+	local i
+
+	i=0
+	FDISK_CMD=""
+
+	for partition in ${ARCH_PARTITION[@]}; do
+		((i++)) || true
+		IFS=',' read -ra detail <<< "${partition}"
+		[ "${detail[0]}" == "+" ] && size="" || size="+${detail[0]}"
+		FDISK_CMD+="n\n\n\n\n${size}\n"
+		FDISK_CMD+="t\n"
+		[ "${i}" -ne 1 ] && FDISK_CMD+="${i}\n"
+		type="${FDISK_TYPE[${detail[1]}]:-${FDISK_TYPE["LINUX"]}}"
+		FDISK_CMD+="${type}\n"
+		log::info "Partition:\nid: ${i}\nsize: ${size}\ntype: ${detail[1]} (${type})"
+	done
+	FDISK_CMD+="w\n"
+	printf "%b" "${FDISK_CMD}" | fdisk "${CHOOSEN_DISK}"
+}
+
+arch::formating()
+{
+	local i
+
+	i=0
+	for partition in ${ARCH_PARTITION[@]}; do
+		((i++)) || true
+		IFS=',' read -ra detail <<< "${partition}"
+		case "${detail[1]}" in
+			"EFI") mkfs.fat -I -F 32 "${CHOOSEN_DISK}${i}";;
+			"SWAP") mkswap "${CHOOSEN_DISK}${i}";;
+			"LINUX") mkfs.ext4 "${CHOOSEN_DISK}${i}";;
+		esac
+	done
+}
+
+arch::mount_disk()
+{
+	local i
+	local mount_point
+	local is_mounted
+	local mounted="$(mount)"
+	local mounted_swap="$(swapon -s)"
+
+	i=0
+	for mount in ${ARCH_MOUNT[@]}; do
+		((i++)) || true
+		IFS=',' read -ra detail <<< "${mount}"
+		mount_point="${CHOOSEN_DISK}${detail[0]}"
+		if [ ${detail[1]} == "swap" ]; then
+			is_mounted="$(grep ${mount_point} <<< ${mounted_swap} 1>/dev/null 2>/dev/null && echo y || echo n)"
+			[ "${is_mounted}" == "y" ] && continue ;
+			swapon ${mount_point}
+		else
+			is_mounted="$(grep ${mount_point} <<< ${mounted} 1>/dev/null 2>/dev/null && echo y || echo n)"
+			[ "${is_mounted}" == "y" ] && continue ;
+			mount --mkdir ${mount_point} /mnt/root${detail[1]}
+		fi
+	done
+}
+
+arch::do_chroot()
+{
+	local cmd="${1?}"
+
+	printf "%s\n" "${cmd}" | arch-chroot /mnt/root
+}
+
+arch::generate_local()
+{
+	log::info "Linking localetime"
+	arch::do_chroot "ln -sf /usr/share/zoneinfo/${ARCH_LOCAL_TZ} /etc/localtime"
+	log::pass "Linked localetime"
+
+	log::info "Activating locale"
+	for togen in ${ARCH_LOCAL_TOGEN[@]}; do
+		arch::uncomment_line "${togen}" "/etc/locale.gen"
+	done
+	log::pass "Activated locale in /etc/locale.gen"
+
+	log::info "Genarating localetime"
+	arch::do_chroot "locale-gen"
+	log::pass "Genarated localetime"
+
+	log::info "Changing LANG"
+	arch::do_chroot "echo 'LANG=${ARCH_LANG}' > /etc/locale.conf"
+	log::info "Changed LANG in /etc/locale.conf"
+}
+
+arch::uncomment_line()
+{
+	local	line="${1?}"
+	local	line_file="${2?}"
+	local	to_replace="$(grep -oE "${line}.*$" /mnt/root/${line_file} || echo failed)"
+	[ "${to_replace}" == "failed" ] && {
+		log::fail "cannot find ${line} into /mnt/root/${line_file}"
+		return
+	}
+	local	regex="s/^.*${to_replace}.*$/${to_replace}/g"
+
+	arch::do_chroot "sed -i \"${regex}\" ${line_file}"
+}
+
+arch::install_grub()
+{
+	arch::do_chroot "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB"
+	arch::do_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+}
+
+arch::enable_service()
+{
+	for service in ${ARCH_SERVICE[@]}; do
+		ln -s /mnt/root{/usr/lib/systemd/system,/etc/systemd/system/multi-user.target.wants}/${service}
+	done
+}
+
+arch::create_user()
+{
+	arch::do_chroot "useradd -m -d /home/${ARCH_USER_NAME} -s /bin/bash ${ARCH_USER_NAME}"
+	arch::do_chroot "echo \"${ARCH_USER_NAME}:${ARCH_USER_PASS}\" | chpasswd"
+	arch::do_chroot "usermod -aG wheel ${ARCH_USER_NAME}"
+	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
+}
+
+arch::install_yay()
+{
+	printf "git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && HOME=/home/${ARCH_USER_NAME} makepkg -si --noconfirm" | arch-chroot -u ${ARCH_USER_NAME} /mnt/root
+	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
+}
+
+arch::configure_pacman()
+{
+	local	target="${1:-/etc/pacman.conf}"
+
+	# activate parallel downloads
+	sed -i 's/#ParallelDownloads.*/ParallelDownloads = 5/g' "${target}"
+	# activate color
+	sed -i "s/#Color/Color/" "${target}"
+	# best option ever
+	sed -i "38 i ILoveCandy" "${target}"
+}
+
+arch::install
 
 exit $?

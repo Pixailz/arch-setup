@@ -27,12 +27,17 @@ ARCH_REFLECTOR_COUNTRY="France"
 ARCH_PKG=(
 # BASE
 	"base" "linux" "linux-firmware"
-	"grub" "efibootmgr"
 	"dbus"
 	"sudo" "base-devel"
+ # BOOT
+	"grub" "efibootmgr"
+ # SERVER X
 	"xorg" "xorg-xinit"
+ # NETWORKING
 	"dhcpcd" "iwd" "networkmanager"
- # OTHER
+ # AUDIO
+	"alsa-utils" "pulseaudio" "pulseaudio-alsa"
+# OTHER
 	"git" "vim" "tmux" "gdb" "valgrind"
 	"docker" "docker-compose"
 	"htop"
@@ -69,4 +74,3 @@ FDISK_TYPE=(
 source "${DIR_INC}/ansi"
 source "${DIR_INC}/log"
 source "${DIR_INC}/utils"
-source "${DIR_INC}/setup"
