@@ -26,25 +26,9 @@ ARCH_MOUNT=(
 ARCH_REFLECTOR_COUNTRY="France"
 ARCH_PKG=(
 # BASE
-	"base" "linux" "linux-firmware"
-	"dbus"
-	"sudo" "base-devel"
+	"base" "linux" "linux-firmware" "sudo" "dbus" "base-devel"
  # BOOT
 	"grub" "efibootmgr"
- # SERVER X
-	"xorg" "xorg-xinit"
- # NETWORKING
-	"dhcpcd" "iwd" "networkmanager"
- # AUDIO
-	"alsa-utils" "pulseaudio" "pulseaudio-alsa"
-# OTHER
-	"git" "tmux" "gdb" "valgrind" "htop"
-	"docker" "docker-compose"
-	"openbsd-netcat"
-	"unzip"
-	"openssh"
- # EDITOR
-	"vim"
 )
 
 ARCH_LOCAL_TZ="Europe/Paris"

@@ -41,8 +41,6 @@ arch::install()
 				--save /etc/pacman.d/mirrorlist
 	log::pass "Refinded mirrors \n$(cat /etc/pacman.d/mirrorlist)"
 
-	arch::configure_pacman
-
 	log::info "Installing base package"
 	pacstrap -K /mnt/root ${ARCH_PKG[@]}
 	log::pass "Installed base package: ${ARCH_PKG[@]}"
@@ -80,7 +78,7 @@ arch::install()
 	log::pass "Installed yay"
 
 	log::info "Configuring pacman"
-	arch::configure_pacman "/mnt/root/etc/pacman.conf"
+	arch::configure_pacman
 	log::pass "Configured pacman"
 
 	local	do_reboot
@@ -298,7 +296,7 @@ arch::install_yay()
 
 arch::configure_pacman()
 {
-	local	target="${1:-/etc/pacman.conf}"
+	local	target="${1:-/mnt/root/etc/pacman.conf}"
 
 	# activate parallel downloads
 	sed -i 's/#ParallelDownloads.*/ParallelDownloads = 5/g' "${target}"
