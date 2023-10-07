@@ -293,6 +293,7 @@ arch::create_user()
 	arch::do_chroot "useradd -m -d /home/${ARCH_USER_NAME} -s /bin/bash ${ARCH_USER_NAME}"
 	arch::do_chroot "echo \"${ARCH_USER_NAME}:${ARCH_USER_PASS}\" | chpasswd"
 	arch::do_chroot "usermod -aG wheel ${ARCH_USER_NAME}"
+	arch::do_chroot "usermod -aG docker ${ARCH_USER_NAME}"
 	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
 }
 
