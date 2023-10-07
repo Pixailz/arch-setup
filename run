@@ -73,6 +73,10 @@ arch::install()
 	arch::create_user
 	log::info "Created new user"
 
+	log::info "Installing yay"
+	arch::install_yay
+	log::pass "Installed yay"
+
 	log::info "Configuring pacman"
 	arch::configure_pacman
 	log::pass "Configured pacman"
@@ -281,7 +285,7 @@ arch::create_user()
 	arch::do_chroot "useradd -m -d /home/${ARCH_USER_NAME} -s /bin/bash ${ARCH_USER_NAME}"
 	arch::do_chroot "echo \"${ARCH_USER_NAME}:${ARCH_USER_PASS}\" | chpasswd"
 	arch::do_chroot "usermod -aG wheel ${ARCH_USER_NAME}"
-	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
+	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
 }
 
 arch::configure_pacman()
