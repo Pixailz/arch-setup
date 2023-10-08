@@ -74,6 +74,13 @@ arch::install()
 	arch::create_user
 	log::info "Created new user"
 
+	log::info "Installing yay"
+	arch::install_yay
+	log::info "Installed yay"
+
+	# reset wheel
+	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
+
 	local	do_reboot
 
 	utils::ask "Do reboot ?" "y" && do_reboot="y" || do_reboot="n"
@@ -221,8 +228,9 @@ arch::mount_disk()
 arch::do_chroot()
 {
 	local cmd="${1?}"
+	local user="${2:-root}"
 
-	printf "%s\n" "${cmd}" | arch-chroot /mnt/root
+	printf "%s\n" "${cmd}" | arch-chroot -u "${user}" /mnt/root
 }
 
 arch::generate_local()
@@ -294,7 +302,14 @@ arch::create_user()
 	arch::do_chroot "echo \"${ARCH_USER_NAME}:${ARCH_USER_PASS}\" | chpasswd"
 	arch::do_chroot "usermod -aG wheel ${ARCH_USER_NAME}"
 	arch::do_chroot "usermod -aG docker ${ARCH_USER_NAME}"
-	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
+	# set no password for sudo to let all pacman | yay command run smoothly
+	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
+}
+
+arch::install_yay()
+{
+	arch::do_chroot \
+		"git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && HOME=/home/${ARCH_USER_NAME} makepkg -si --noconfirm" "${ARCH_USER_NAME}"
 }
 
 arch::install
