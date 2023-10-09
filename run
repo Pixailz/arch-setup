@@ -306,7 +306,8 @@ arch::create_user()
 	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
 
 	for folder in ${ARCH_USER_DEFAULT_DIR[@]}; do
-		mkdir -p "${HOME}/${folder}"
+		arch::do_chroot "mkdir -p /home/${ARCH_USER_NAME}/${folder}" "${ARCH_USER_NAME}"
+		log::pass "created /home/${ARCH_USER_NAME}/${folder}"
 	done
 }
 
