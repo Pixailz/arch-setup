@@ -304,6 +304,10 @@ arch::create_user()
 	arch::do_chroot "usermod -aG docker ${ARCH_USER_NAME}"
 	# set no password for sudo to let all pacman | yay command run smoothly
 	echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > "/mnt/root/etc/sudoers.d/wheel"
+
+	for folder in ${ARCH_USER_DEFAULT_DIR[@]}; do
+		mkdir -p "${HOME}/${folder}"
+	done
 }
 
 arch::install_yay()
