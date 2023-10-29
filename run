@@ -81,6 +81,10 @@ arch::install()
 	# reset wheel
 	echo "%wheel ALL=(ALL:ALL) ALL" > "/mnt/root/etc/sudoers.d/wheel"
 
+	log::info "Configuring keyboard layout"
+	arch::configure_kb_layout
+	log::pass "Configured keyboard layout"
+
 	local	do_reboot
 
 	utils::ask "Do reboot ?" "y" && do_reboot="y" || do_reboot="n"
@@ -315,6 +319,11 @@ arch::install_yay()
 {
 	arch::do_chroot \
 		"git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && HOME=/home/${ARCH_USER_NAME} makepkg -si --noconfirm" "${ARCH_USER_NAME}"
+}
+
+arch::configure_kb_layout()
+{
+	arch::do_chroot "localectl set-x11-keymap ${ARCH_KEYMAP} '' ${ARCH_KEYMAP_VARIANT}"
 }
 
 arch::install
